@@ -13,6 +13,7 @@ services:
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
     build:
       context: ./falcon-strike-command
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
     working_dir: /app
     entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
     volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
       - ./falcon-strike-command:/app
       - ./shared/entrypoint.sh:/entrypoint.sh:ro
       - ./shared/proto:/proto:ro
@@ -32,6 +34,7 @@ services:
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
     build:
       context: ./eagle-eye-broadcast
       dockerfile: Dockerfile
@@ -39,6 +42,7 @@ services:
     working_dir: /app
     entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
     volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
       - ./eagle-eye-broadcast:/app
       - ./shared/entrypoint.sh:/entrypoint.sh:ro
       - ./shared/proto:/proto:ro
@@ -51,6 +55,7 @@ services:
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
     build:
       context: ./hawk-engagement-monitor
       dockerfile: Dockerfile
@@ -58,6 +63,7 @@ services:
     working_dir: /app
     entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
     volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
       - ./hawk-engagement-monitor:/app
       - ./shared/entrypoint.sh:/entrypoint.sh:ro
       - ./shared/proto:/proto:ro
@@ -70,6 +76,7 @@ services:
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
     build:
       context: ./viper-listener
       dockerfile: Dockerfile
@@ -77,6 +84,7 @@ services:
     working_dir: /app
     entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
     volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
       - ./viper-listener:/app
       - ./shared/entrypoint.sh:/entrypoint.sh:ro
       - ./shared/proto:/proto:ro
@@ -89,6 +97,7 @@ services:
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
     build:
       context: ./raptor-listener
       dockerfile: Dockerfile
@@ -96,11 +105,33 @@ services:
     working_dir: /app
     entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
     volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
       - ./raptor-listener:/app
       - ./shared/entrypoint.sh:/entrypoint.sh:ro
       - ./shared/proto:/proto:ro
     ports:
       - "8085:8080"
+    networks: [mqtt-net]
+
+  hydra-duplex-node:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+      LOG4J_CONFIGURATION_FILE: /config/log4j2.xml
+    build:
+      context: ./hydra-duplex-node
+      dockerfile: Dockerfile
+    container_name: hydra-duplex-node
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./shared/log4j2.xml:/config/log4j2.xml:ro
+      - ./hydra-duplex-node:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8086:8080"
     networks: [mqtt-net]
 networks:
   mqtt-net:

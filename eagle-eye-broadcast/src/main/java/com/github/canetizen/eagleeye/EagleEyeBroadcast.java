@@ -1,14 +1,20 @@
+/*
+ * Author: canetizen
+ * Created on Mon Aug 11 2025
+ * Description: Example MQTT-based Java service that demonstrates publishing and/or subscribing 
+ *              to specific topics using the Eclipse Paho MQTT client library.
+ */
+
 package com.github.canetizen.eagleeye;
 
 import com.github.canetizen.proto.TacticalBroadcast;
 import com.github.canetizen.proto.Weapon;
-import org.eclipse.paho.client.mqttv3.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,27 +23,21 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class EagleEyeBroadcast {
-    private static FileWriter logWriter;
-    private static MqttClient client;
+    private static final Logger log = LogManager.getLogger("EagleEye");
     private static final String TOPIC = "TacticalBroadcast";
     private static final Random random = new Random();
+    private static MqttClient client;
 
     public static void main(String[] args) {
         try {
-            setupLogger();
+            addShutdownHook();
             connectMqtt();
             publishLoop();
         } catch (Exception e) {
-            logError(e.getMessage());
+            log.error("{}", e.toString());
         } finally {
             cleanup();
         }
-    }
-
-    private static void setupLogger() throws IOException {
-        File logDir = new File("logs");
-        if (!logDir.exists()) logDir.mkdirs();
-        logWriter = new FileWriter(new File(logDir, "eagle-eye.log"), true);
     }
 
     private static void connectMqtt() throws MqttException {
@@ -46,7 +46,7 @@ public class EagleEyeBroadcast {
         String clientId = "eagle-eye-broadcast-" + UUID.randomUUID();
         client = new MqttClient(broker, clientId);
         client.connect();
-        logInfo("Connected to broker " + broker);
+        log.info("Connected to broker {}", broker);
     }
 
     private static void publishLoop() throws Exception {
@@ -66,18 +66,19 @@ public class EagleEyeBroadcast {
 
             client.publish(TOPIC, msg.toByteArray(), 1, false);
 
-            Map<String,Object> f = new LinkedHashMap<>();
-            f.put("AircraftId", msg.getAircraftId());
-            f.put("Lat", msg.getLatitude());
-            f.put("Lon", msg.getLongitude());
-            f.put("AltFt", msg.getAltitudeFt());
-            f.put("HeadingDeg", msg.getHeadingDeg());
-            f.put("AirspeedKts", msg.getAirspeedKts());
-            f.put("FuelPct", msg.getFuelPct());
-            f.put("Weapons", formatWeapons(msg.getWeaponsList())); // << burada düz
-            f.put("Timestamp", msg.getTimestamp());
-            prettyBlock("TacticalBroadcast → publish", "EagleEye", f);
+            Map<String,Object> fields = new LinkedHashMap<>();
+            fields.put("Topic", TOPIC);
+            fields.put("AircraftId", msg.getAircraftId());
+            fields.put("Lat", msg.getLatitude());
+            fields.put("Lon", msg.getLongitude());
+            fields.put("AltFt", msg.getAltitudeFt());
+            fields.put("HeadingDeg", msg.getHeadingDeg());
+            fields.put("AirspeedKts", msg.getAirspeedKts());
+            fields.put("FuelPct", msg.getFuelPct());
+            fields.put("Weapons", formatWeapons(msg.getWeaponsList()));
+            fields.put("Timestamp", msg.getTimestamp());
 
+            log.info(buildMessage("TacticalBroadcast → publish", fields));
             Thread.sleep(3000);
         }
     }
@@ -89,38 +90,18 @@ public class EagleEyeBroadcast {
                 .collect(Collectors.joining(", "));
     }
 
+    private static String buildMessage(String title, Map<String, Object> fields){
+        StringBuilder sb = new StringBuilder();
+        sb.append(title).append('\n');
+        fields.forEach((k,v) -> sb.append(k).append(": ").append(v).append('\n'));
+        return sb.toString();
+    }
+
+    private static void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(EagleEyeBroadcast::cleanup));
+    }
+
     private static void cleanup() {
         try { if (client != null && client.isConnected()) client.disconnect(); } catch (Exception ignored) {}
-        try { if (logWriter != null) logWriter.close(); } catch (Exception ignored) {}
-    }
-
-    // ===== helpers =====
-    private static void logInfo(String msg){ prettyLine("INFO", "EagleEye", msg); }
-    private static void logError(String msg){ prettyLine("ERROR","EagleEye", msg); }
-
-    private static void prettyBlock(String title, String app, Map<String,Object> f){
-        String ts = ZonedDateTime.now().toString();
-        String header = ts + " DATA  " + pad(app,12) + " | " + title;
-        String border = repeat('─', Math.max(72, header.length()));
-        write(border); write(header); write(border);
-
-        int tmpWidth = f.keySet().stream().mapToInt(String::length).max().orElse(10);
-        final int keyWidth = Math.max(10, Math.min(24, tmpWidth));
-        f.forEach((k,v)-> write(String.format("%-" + keyWidth + "s : %s", k, v)));
-
-        write(border); write("");
-    }
-    private static void prettyLine(String level, String app, String msg){
-        String ts = ZonedDateTime.now().toString();
-        write(String.format("%s %-5s %s | %s", ts, level, pad(app,12), msg));
-    }
-    private static String pad(String s,int n){ return String.format("%-" + n + "s", s); }
-    private static String repeat(char c,int n){ char[] a=new char[n]; java.util.Arrays.fill(a,c); return new String(a); }
-    private static void write(String s){
-        try{
-            if (logWriter == null) setupLogger();
-            logWriter.write(s.endsWith("\n")? s : s+"\n");
-            logWriter.flush();
-        }catch(IOException ignored){}
     }
 }

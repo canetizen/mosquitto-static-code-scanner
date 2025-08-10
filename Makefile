@@ -56,3 +56,9 @@ clean-logs: ## Remove all log files from each application
 
 rebuild-protos: clean-generated clean-logs ## Remove generated protobufs, logs, and rebuild services
 	$(DC) up --build
+
+build-scan: ## Build static-code-scanner JAR
+	cd static-code-scanner && mvn -q -DskipTests package
+
+run-scan: ## Run static-code-scanner against current directory
+	java -jar static-code-scanner/target/static-code-scanner-1.0.0.jar .

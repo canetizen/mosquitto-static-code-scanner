@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Author: canetizen
+# Created on Mon Aug 11 2025
+# Description: Build-and-run entrypoint script for a Java MQTT service container.
+#              Installs protoc, generates Java classes from .proto files,
+#              builds the Maven project, and launches the service JAR.
+
 cd /app
 
 # Install protoc if not present
