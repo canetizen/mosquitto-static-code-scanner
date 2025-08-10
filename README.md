@@ -10,11 +10,6 @@ The **Static Code Scanner** uses *static analysis* — it parses Java source cod
 Because of this, it has some inherent limitations:
 
 * **Dynamic values**: Topics, QoS, or retained flags read from environment variables, config files, or computed at runtime will appear as raw expressions (e.g., `"config.getTopic()"`) rather than resolved values.
-* **MQTT message overloads**:
-
-  * For `publish(String, MqttMessage)`, QoS and retained flags are extracted from the `MqttMessage` object at runtime — the scanner will mark these as `?`.
-  * For `subscribe(String[] topics, int[] qos)`, the scanner will print joined arrays but cannot guarantee correct pairing of topic and QoS.
-* **Separate `setRetained` calls**: If `setRetained(true/false)` is called on an `MqttMessage` in a separate line from the `publish` call, the scanner reports it as a separate `SET_RETAINED` row without linking it to a specific topic.
 * **No cross-method tracking**: If a topic or message is constructed in one method and passed to another, the scanner won't resolve it.
 * **No runtime verification**: The scanner cannot confirm whether the code paths are actually executed during service runtime — it only inspects the source.
 
