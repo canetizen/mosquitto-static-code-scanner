@@ -1,4 +1,4 @@
-# Mosquitto Static Code Scanner
+# MQTT Static Code Scanner
 
 This repository contains example MQTT-based Java services and a static code scanner tool that detects `publish` and `subscribe` calls within the codebase.
 
