@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package com.github.canetizen.proto;
+
+option java_package = "com.github.canetizen.proto";
+option java_multiple_files = true;
+
+// Type B message: Targeting and engagement commands
+message EngagementCommand {
+  string commandId = 1;        // Command ID (UUID)
+  string fromCallsign = 2;     // Sender callsign
+  string toCallsign = 3;       // Receiver callsign
+  CommandType commandType = 4; // Command type enum
+  string targetId = 5;         // Target identifier
+  double targetLat = 6;        // Target latitude
+  double targetLon = 7;        // Target longitude
+  int32 targetAltFt = 8;       // Target altitude in feet
+  int32 priority = 9;          // Priority (1 high, 5 low)
+  int64 timestamp = 10;        // Unix epoch time in milliseconds
+}
+
+// Enumeration of possible command types
+enum CommandType {
+  LOCK = 0;             // Lock target
+  ENGAGE = 1;           // Engage target
+  HOLD_FIRE = 2;        // Hold fire
+  RETURN_TO_BASE = 3;   // Return to base
+}

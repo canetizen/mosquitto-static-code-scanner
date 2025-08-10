@@ -1,0 +1,107 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks: [mqtt-net]
+
+  falcon-strike-command:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+    build:
+      context: ./falcon-strike-command
+      dockerfile: Dockerfile
+    container_name: falcon-strike-command
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./falcon-strike-command:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8081:8080"
+    networks: [mqtt-net]
+
+  eagle-eye-broadcast:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+    build:
+      context: ./eagle-eye-broadcast
+      dockerfile: Dockerfile
+    container_name: eagle-eye-broadcast
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./eagle-eye-broadcast:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8082:8080"
+    networks: [mqtt-net]
+
+  hawk-engagement-monitor:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+    build:
+      context: ./hawk-engagement-monitor
+      dockerfile: Dockerfile
+    container_name: hawk-engagement-monitor
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./hawk-engagement-monitor:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8083:8080"
+    networks: [mqtt-net]
+
+  viper-listener:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+    build:
+      context: ./viper-listener
+      dockerfile: Dockerfile
+    container_name: viper-listener
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./viper-listener:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8084:8080"
+    networks: [mqtt-net]
+
+  raptor-listener:
+    image: maven:3.9.10-eclipse-temurin-24
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: "1883"
+    build:
+      context: ./raptor-listener
+      dockerfile: Dockerfile
+    container_name: raptor-listener
+    working_dir: /app
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    volumes:
+      - ./raptor-listener:/app
+      - ./shared/entrypoint.sh:/entrypoint.sh:ro
+      - ./shared/proto:/proto:ro
+    ports:
+      - "8085:8080"
+    networks: [mqtt-net]
+networks:
+  mqtt-net:
+    driver: bridge

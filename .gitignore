@@ -1,0 +1,5 @@
+**/logs
+**/target
+.vscode
+**/proto
+!shared/proto

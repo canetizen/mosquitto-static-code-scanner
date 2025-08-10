@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package com.github.canetizen.proto;
+
+option java_package = "com.github.canetizen.proto";
+option java_multiple_files = true;
+
+// Type A message: Real-time aircraft status and telemetry
+message TacticalBroadcast {
+  string aircraftId = 1;   // Callsign, e.g., "EAGLE-01"
+  double latitude = 2;     // Latitude in decimal degrees
+  double longitude = 3;    // Longitude in decimal degrees
+  int32 altitudeFt = 4;    // Altitude in feet
+  int32 headingDeg = 5;    // Heading in degrees (0-359)
+  int32 airspeedKts = 6;   // Airspeed in knots
+  int32 fuelPct = 7;       // Remaining fuel percentage
+  repeated Weapon weapons = 8; // Weapon loadout
+  int64 timestamp = 9;     // Unix epoch time in milliseconds
+}
+
+// Nested message representing a weapon and its count
+message Weapon {
+  string type = 1;         // Weapon type, e.g., "AIM-120"
+  int32 count = 2;         // Number of weapons of this type
+}
