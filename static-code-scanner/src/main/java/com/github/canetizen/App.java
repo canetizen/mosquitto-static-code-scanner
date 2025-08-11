@@ -22,7 +22,7 @@ public class App {
             System.exit(1);
         }
 
-        List<File> modules = ScannerUtils.discoverMavenModules(root.toPath());
+        List<File> modules = ScannerImpl.discoverMavenModules(root.toPath());
         if (modules.isEmpty()) modules = List.of(root);
 
         StaticCodeScanner scanner = new StaticCodeScanner();

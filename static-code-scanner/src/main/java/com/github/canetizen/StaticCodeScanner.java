@@ -37,16 +37,16 @@ public class StaticCodeScanner {
             } catch (Exception ex) {
                 continue;
             }
-            if (!ScannerUtils.usesPaho(cu)) continue;
+            if (!ScannerImpl.usesPaho(cu)) continue;
 
-            Map<String, String> stringConsts = ScannerUtils.collectStaticFinalStringConstants(cu);
-            Map<String, String> intConsts = ScannerUtils.collectStaticFinalIntConstants(cu);
+            Map<String, String> stringConsts = ScannerImpl.collectStaticFinalStringConstants(cu);
+            Map<String, String> intConsts = ScannerImpl.collectStaticFinalIntConstants(cu);
 
             new VoidVisitorAdapter<Void>() {
                 @Override
                 public void visit(MethodCallExpr m, Void arg) {
                     super.visit(m, arg);
-                    Hit hit = ScannerUtils.analyzeMethodCall(m, root, module, jf, stringConsts, intConsts);
+                    Hit hit = ScannerImpl.analyzeMethodCall(m, root, module, jf, stringConsts, intConsts);
                     if (hit != null) {
                         hits.add(hit);
                     }

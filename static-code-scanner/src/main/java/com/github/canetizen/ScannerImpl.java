@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ScannerUtils {
+public class ScannerImpl {
 
     /**
      * Walks the filesystem under {@code root} and returns directories that look like Maven modules:
@@ -145,7 +145,7 @@ public class ScannerUtils {
                 // If qos is an array, resolve each and join with " | "
                 if (qosArg.isArrayCreationExpr() || qosArg.isArrayInitializerExpr()) {
                     List<String> qosItems = resolveQosList(qosArg, stringConsts, intConsts)
-                            .stream().map(ScannerUtils::qosWithMeaning).toList();
+                            .stream().map(ScannerImpl::qosWithMeaning).toList();
                     qos = String.join(" | ", qosItems);
                 } else {
                     qos = qosWithMeaning(resolveQos(qosArg, stringConsts, intConsts));
