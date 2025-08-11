@@ -25,7 +25,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.github.canetizen.StaticCodeScanner</mainClass>
+                  <mainClass>com.github.canetizen.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>
